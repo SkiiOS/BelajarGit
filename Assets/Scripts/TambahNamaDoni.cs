@@ -11,6 +11,6 @@ public class TambahNamaDoni : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 }
