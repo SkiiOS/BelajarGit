@@ -36,6 +36,12 @@ public class GameManager : MonoBehaviour
             Time.timeScale = 1f;
             UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
         }
+
+        if (currentState == GameState.GameOver && Input.GetKeyDown(KeyCode.M))
+        {
+            Time.timeScale = 1f;
+            UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+        }
     }
 
     public void PauseGame()
