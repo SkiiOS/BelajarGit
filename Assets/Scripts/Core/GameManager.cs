@@ -30,6 +30,12 @@ public class GameManager : MonoBehaviour
                 ResumeGame();
             }
         }
+
+        if (currentState == GameState.GameOver && Input.GetKeyDown(KeyCode.R))
+        {
+            Time.timeScale = 1f;
+            UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
+        }
     }
 
     public void PauseGame()
