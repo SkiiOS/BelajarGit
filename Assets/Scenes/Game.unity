@@ -3186,7 +3186,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6080a0859a571264b9d155ff9b9f6005, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   playerData: {fileID: 0}
+=======
+<<<<<<< Updated upstream
+=======
+  playerData: {fileID: 11400000, guid: 866fd3cb334216f459dcd42765f0346c, type: 2}
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
   currentHP: 100
 --- !u!114 &1775706134
 MonoBehaviour:
