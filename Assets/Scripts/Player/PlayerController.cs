@@ -11,6 +11,13 @@ public class PlayerController : MonoBehaviour
     public float shootCooldown = 0.3f;
     private float shootTimer = 0f;
 
+    [Header("Magazine")]
+    public int currentAmmo;
+    public int maxAmmo = 10;
+    public float reloadTime = 1.5f;
+    private float reloadTimer = 0f;
+    private bool isReloading = false;
+
     private PlayerInput playerInput;
     private Vector2 moveInput;
 
@@ -20,11 +27,14 @@ public class PlayerController : MonoBehaviour
         if (playerData != null)
         {
             currentHP = playerData.maxHP;
+            maxAmmo = playerData.magazineSize;
+            reloadTime = playerData.reloadTime;
         }
         else
         {
             currentHP = 100f;
         }
+        currentAmmo = maxAmmo;
     }
 
     void Update()
@@ -39,6 +49,26 @@ public class PlayerController : MonoBehaviour
         float currentSpeed = playerData != null ? playerData.moveSpeed : 5f;
         transform.Translate(new Vector3(h, v, 0) * currentSpeed * Time.deltaTime);
 
+        // Reload sedang berjalan
+        if (isReloading)
+        {
+            reloadTimer -= Time.deltaTime;
+            if (reloadTimer <= 0)
+            {
+                currentAmmo = maxAmmo;
+                isReloading = false;
+                Debug.Log("Reload complete! Ammo: " + currentAmmo);
+            }
+            return; // Tidak bisa tembak saat reload
+        }
+
+        // Tekan R untuk reload manual
+        if (Input.GetKeyDown(KeyCode.R) && currentAmmo < maxAmmo)
+        {
+            StartReload();
+            return;
+        }
+
         // Cooldown timer
         if (shootTimer > 0)
         {
@@ -48,9 +78,23 @@ public class PlayerController : MonoBehaviour
         // Shoot ke arah mouse saat klik kiri
         if (Input.GetMouseButton(0) && shootTimer <= 0)
         {
-            ShootTowardMouse();
-            shootTimer = shootCooldown;
+            if (currentAmmo > 0)
+            {
+                ShootTowardMouse();
+                shootTimer = shootCooldown;
+            }
+            else
+            {
+                Debug.Log("Ammo habis! Tekan R untuk reload.");
+            }
         }
+    }
+
+    void StartReload()
+    {
+        isReloading = true;
+        reloadTimer = reloadTime;
+        Debug.Log("Reloading... (" + reloadTime + "s)");
     }
 
     void OnCollisionStay2D(Collision2D collision)
@@ -100,5 +144,8 @@ public class PlayerController : MonoBehaviour
                 bullet.Setup(direction);
             }
         }
+
+        currentAmmo--;
+        Debug.Log("Ammo: " + currentAmmo + "/" + maxAmmo);
     }
 }
