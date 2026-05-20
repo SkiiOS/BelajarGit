@@ -10,11 +10,9 @@ public class PlayerController : MonoBehaviour
     [Header("Shooting")]
     public float shootCooldown = 0.3f;
     private float shootTimer = 0f;
-    private Vector2 lastMoveDirection = Vector2.right;
 
     private PlayerInput playerInput;
     private Vector2 moveInput;
-    private float attackInput;
 
     void Start()
     {
@@ -25,29 +23,21 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            currentHP = 100f; // Fallback
+            currentHP = 100f;
         }
     }
-    
+
     void Update()
     {
         if (GameManager.Instance != null && GameManager.Instance.currentState != GameState.Playing) return;
         if (playerInput == null) return;
-        
-        moveInput = playerInput.actions["Move"].ReadValue<Vector2>();
-        attackInput = playerInput.actions["Attack"].ReadValue<float>();
 
+        // Movement
+        moveInput = playerInput.actions["Move"].ReadValue<Vector2>();
         float h = moveInput.x;
         float v = moveInput.y;
-
         float currentSpeed = playerData != null ? playerData.moveSpeed : 5f;
         transform.Translate(new Vector3(h, v, 0) * currentSpeed * Time.deltaTime);
-
-        // Track last move direction for shooting
-        if (moveInput.sqrMagnitude > 0.001f)
-        {
-            lastMoveDirection = moveInput.normalized;
-        }
 
         // Cooldown timer
         if (shootTimer > 0)
@@ -55,10 +45,10 @@ public class PlayerController : MonoBehaviour
             shootTimer -= Time.deltaTime;
         }
 
-        // Shoot when attack is pressed and cooldown has elapsed
-        if (attackInput > 0 && shootTimer <= 0)
+        // Shoot ke arah mouse saat klik kiri
+        if (Input.GetMouseButton(0) && shootTimer <= 0)
         {
-            Shoot();
+            ShootTowardMouse();
             shootTimer = shootCooldown;
         }
     }
@@ -84,24 +74,31 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void Shoot()
+    void ShootTowardMouse()
     {
-        if (BulletPool.Instance != null)
+        if (BulletPool.Instance == null)
         {
-            GameObject bulletObj = BulletPool.Instance.GetBullet();
-            if (bulletObj != null)
-            {
-                bulletObj.transform.position = transform.position;
-                Bullet bullet = bulletObj.GetComponent<Bullet>();
-                if (bullet != null)
-                {
-                    bullet.Setup(lastMoveDirection);
-                }
-            }
+            Debug.LogWarning("BulletPool not found!");
+            return;
         }
-        else
+
+        // Konversi posisi mouse di screen ke posisi di world space
+        Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        mouseWorld.z = 0f;
+
+        // Hitung arah dari player ke mouse
+        Vector2 direction = (mouseWorld - transform.position).normalized;
+
+        // Ambil bullet dari pool dan setup
+        GameObject bulletObj = BulletPool.Instance.GetBullet();
+        if (bulletObj != null)
         {
-            Debug.LogWarning("BulletPool not found! Player shoots!");
+            bulletObj.transform.position = transform.position;
+            Bullet bullet = bulletObj.GetComponent<Bullet>();
+            if (bullet != null)
+            {
+                bullet.Setup(direction);
+            }
         }
     }
 }
