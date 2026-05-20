@@ -12,7 +12,7 @@ public class Bullet : MonoBehaviour
         lifetimeTimer = bulletData != null ? bulletData.lifetime : 2f;
 
         // Optional: Rotate bullet to face the movement direction
-        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.RadDeg;
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
     }
 
