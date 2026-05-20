@@ -3,19 +3,15 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-<<<<<<< Updated upstream
+    [Header("Player Stats")]
     public PlayerData playerData;
     public float currentHP;
-=======
-<<<<<<< Updated upstream
-    public float currentHP = 100;
-    public float speed = 5f;
-=======
-    public PlayerData playerData;
 
-    public float currentHP;
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+    [Header("Shooting")]
+    public float shootCooldown = 0.3f;
+    private float shootTimer = 0f;
+    private Vector2 lastMoveDirection = Vector2.right;
+
     private PlayerInput playerInput;
     private Vector2 moveInput;
     private float attackInput;
@@ -27,8 +23,11 @@ public class PlayerController : MonoBehaviour
         {
             currentHP = playerData.maxHP;
         }
+        else
+        {
+            currentHP = 100f; // Fallback
+        }
     }
-    
     
     void Update()
     {
@@ -36,28 +35,32 @@ public class PlayerController : MonoBehaviour
         if (playerInput == null) return;
         
         moveInput = playerInput.actions["Move"].ReadValue<Vector2>();
-
         attackInput = playerInput.actions["Attack"].ReadValue<float>();
 
         float h = moveInput.x;
         float v = moveInput.y;
 
-<<<<<<< Updated upstream
-        float currentSpeed = playerData != null ? playerData.moveSpeed : 5f;
-        transform.Translate(new Vector3(h, v, 0) * currentSpeed * Time.deltaTime);
-=======
-<<<<<<< Updated upstream
-        transform.Translate(new Vector3(h, v, 0) * speed * Time.deltaTime);
-=======
         float currentSpeed = playerData != null ? playerData.moveSpeed : 5f;
         transform.Translate(new Vector3(h, v, 0) * currentSpeed * Time.deltaTime);
 
-        if (attackInput > 0) 
+        // Track last move direction for shooting
+        if (moveInput.sqrMagnitude > 0.001f)
+        {
+            lastMoveDirection = moveInput.normalized;
+        }
+
+        // Cooldown timer
+        if (shootTimer > 0)
+        {
+            shootTimer -= Time.deltaTime;
+        }
+
+        // Shoot when attack is pressed and cooldown has elapsed
+        if (attackInput > 0 && shootTimer <= 0)
         {
             Shoot();
+            shootTimer = shootCooldown;
         }
->>>>>>> Stashed changes
->>>>>>> Stashed changes
     }
 
     void OnCollisionStay2D(Collision2D collision)
@@ -83,6 +86,22 @@ public class PlayerController : MonoBehaviour
 
     void Shoot()
     {
-        Debug.Log("Player shoots!");
+        if (BulletPool.Instance != null)
+        {
+            GameObject bulletObj = BulletPool.Instance.GetBullet();
+            if (bulletObj != null)
+            {
+                bulletObj.transform.position = transform.position;
+                Bullet bullet = bulletObj.GetComponent<Bullet>();
+                if (bullet != null)
+                {
+                    bullet.Setup(lastMoveDirection);
+                }
+            }
+        }
+        else
+        {
+            Debug.LogWarning("BulletPool not found! Player shoots!");
+        }
     }
 }
